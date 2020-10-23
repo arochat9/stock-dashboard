@@ -1,0 +1,10 @@
+.VirtualizedSelectOption {
+  overflow: hidden;
+  font-size: .8em;
+}
+.VirtualizedSelectOption {
+  white-space: nowrap;
+  overflow: scroll;
+  text-overflow: ellipsis;
+  font-size: .8em;
+}
