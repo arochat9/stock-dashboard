@@ -39,9 +39,10 @@ scheduler = BackgroundScheduler(daemon=True)
 #     scheduler.print_jobs()
 #     table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
 
-scheduler.add_job(lambda : scheduler.print_jobs(),'cron',day_of_week='mon-fri', hour=18, minute=40, timezeon='EST')
+# scheduler.add_job(lambda : scheduler.print_jobs(),'cron',day_of_week='mon-fri', hour=18, minute=40, timezeon='EST')
 # scheduler.add_job(updateTableDF,'cron',hour=2, timezone='EST')
-# scheduler.start()
+scheduler.add_job(lambda : scheduler.print_jobs(),'interval',seconds=5)
+scheduler.start()
 
 def getMarketMoverData(category, timeLength):
     print("*******")
