@@ -78,45 +78,9 @@ def scheduled_job():
 #     print("**********")
 #     print("**********")
 #     tickers_df = pd.read_csv('Tickers/compilation.csv')
-#     ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+    ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+    
 scheduler.start()
-
-
-# print('normal one')
-# print(table_df)
-# del table_df
-# for tckr in tickers_df['Symbol'].to_list():
-#     try:
-#         dfTemp = yf.download(tckr, threads = False, period='1y', group_by='ticker', threads=False)
-#         dfTemp["Ticker"] = tckr[0]
-#         table_df = df4.append(df3)
-#     except:
-#         pass
-# print('new one')
-# print(table_df)
-
-# scheduler = BackgroundScheduler(daemon=True)
-
-# def updateTableDF():
-#     print('Updating table_df.')
-#     scheduler.print_jobs()
-#     tickers_df = pd.read_csv('Tickers/compilation.csv')
-#     # table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
-#
-#     failedTickers = []
-#     del table_df
-#     for tckr in tickers_df['Symbol'].to_list():
-#         try:
-#             dfTemp = yf.download(tckr, threads = False, period='1y', group_by='ticker', threads=False)
-#             dfTemp["Ticker"] = row[0]
-#             table_df = df4.append(df3)
-#         except:
-#             pass
-
-
-# scheduler.add_job(lambda : scheduler.print_jobs(),'interval',seconds=5)
-# scheduler.add_job(updateTableDF,'cron',hour=2, timezone='EST')
-# scheduler.start()
 
 def getMarketMoverData(category, timeLength):
 
