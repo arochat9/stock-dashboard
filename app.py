@@ -91,7 +91,8 @@ def getMarketMoverData(category, timeLength):
         # print(ticker_df)
         if abs(timeIndex) >= len(ticker_df.index):
             percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[0]-1)*100
-        percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[timeIndex]-1)*100
+        else:
+            percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[timeIndex]-1)*100
 
         if pd.isna(percentChange) == False:
             percentChange = round(percentChange, 2)
@@ -158,7 +159,7 @@ def make_layout():
         ),
         dcc.Graph(
             id='stock-graph',
-            style={'width': '74%', 'float': 'right', "display":"inline-block", 'borderLeft':'4px solid #828282'}
+            style={'width': '74%', 'float': 'right', "display":"inline-block", 'borderLeft':'1px solid #828282'}
         ),
     ], style={'border': '4px solid #828282', 'borderRadius': '10px', 'padding': '15px'}),
     html.Div([
