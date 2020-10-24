@@ -61,7 +61,7 @@ scheduler = BackgroundScheduler(daemon=True)
 scheduleRunCounter = 1
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', day_of_week='fri', hour=23, minute=33)
+@scheduler.scheduled_job('cron', day_of_week='fri', hour=23, minute=38)
 def scheduled_job():
     print("**********")
     print("**********")
