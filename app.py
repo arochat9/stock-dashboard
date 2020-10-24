@@ -56,7 +56,7 @@ ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
 scheduler = BackgroundScheduler(daemon=True)
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=7, minute=30, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=18, minute=30, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
