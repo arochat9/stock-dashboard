@@ -59,26 +59,26 @@ ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
 
 
 
-# scheduler = BackgroundScheduler(daemon=True)
-# scheduleRunCounter = 1
+scheduler = BackgroundScheduler(daemon=True)
+scheduleRunCounter = 1
 
 # # scheduler = BackgroundScheduler(daemon=True)
 # # @scheduler.scheduled_job('cron', hour=4, minute=20, timezone='UTC')
 # # def scheduled_job():
 # #     print('TestinAHHHHg.')
 
-# # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-# @scheduler.scheduled_job('cron', hour=4, minute=32, timezone='UTC')
-# def scheduled_job():
-#     print("**********")
-#     print("**********")
-#     print("Running job. Time number: "+str(scheduleRunCounter))
-#     scheduleRunCounter = scheduleRunCounter+1
-#     print("**********")
-#     print("**********")
+# @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
+@scheduler.scheduled_job('cron', hour=4, minute=51, timezone='UTC')
+def scheduled_job():
+    print("**********")
+    print("**********")
+    print("Running job. Time number: "+str(scheduleRunCounter))
+    scheduleRunCounter = scheduleRunCounter+1
+    print("**********")
+    print("**********")
 #     tickers_df = pd.read_csv('Tickers/compilation.csv')
-#     ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
-# scheduler.start()
+    ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+scheduler.start()
 
 
 # print('normal one')
