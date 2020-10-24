@@ -31,23 +31,23 @@ print("Run on server start")
 # table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
 
 #To supress print lines from yfinance
-@contextmanager
-def suppress_stdout():
-    with open(os.devnull, "w") as devnull:
-        old_stdout = sys.stdout
-        sys.stdout = devnull
-        try:
-            yield
-        finally:
-            sys.stdout = old_stdout
+# @contextmanager
+# def suppress_stdout():
+#     with open(os.devnull, "w") as devnull:
+#         old_stdout = sys.stdout
+#         sys.stdout = devnull
+#         try:
+#             yield
+#         finally:
+#             sys.stdout = old_stdout
 
 def createTickerDict(tickerStrings):
     ticker_df_dict_temp = {}
     print("Beginning yfinance data pull")
-    for ticker in tqdm(tickerStrings):
+    for ticker in tickerStrings:# tqdm(tickerStrings):
         try:
-            with suppress_stdout():
-                data = yf.download(ticker, group_by="Ticker", period='1y')
+#             with suppress_stdout():
+            data = yf.download(ticker, group_by="Ticker", period='1y')
             ticker_df_dict_temp[ticker] = data
         except Exception as ex:
             print(ex)
