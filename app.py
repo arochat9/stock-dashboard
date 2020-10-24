@@ -1,5 +1,4 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-
 from datetime import date
 import dash
 import dash_core_components as dcc
@@ -10,96 +9,233 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import yfinance as yf
+import timeit
+from contextlib import contextmanager
+import sys, os
+from tqdm import tqdm
 
-
-tabtitle='Stock Dashboard'
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
-app.title=tabtitle
+
+# server = app.server
+# app.title=Stock Dashboard
 
 #pull all ticker information
 # tickers_df = pd.concat(map(pd.read_csv, ['Tickers/nasdaq.csv', 'Tickers/amex.csv','Tickers/nyse.csv']))
-tickers_df = pd.read_csv('Tickers/compilation.csv')
 tickers_df = pd.read_csv('Tickers/compilation_testSize.csv')
-
+# tickers_df = pd.read_csv('Tickers/compilation.csv')
 #initialize table_df
 # table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
 
-#Amount of seconds between update
-# UPDADE_INTERVAL = 120
-
-print("here in the code")
+print("Run on server start")
 # table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
 
+#To supress print lines from yfinance
+@contextmanager
+def suppress_stdout():
+    with open(os.devnull, "w") as devnull:
+        old_stdout = sys.stdout
+        sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
+
+def createTickerDict(tickerStrings):
+    ticker_df_dict_temp = {}
+    print("Beginning yfinance data pull")
+    for ticker in tqdm(tickerStrings):
+        try:
+            with suppress_stdout():
+                data = yf.download(ticker, group_by="Ticker", period='1y')
+            ticker_df_dict_temp[ticker] = data
+        except Exception as ex:
+            print(ex)
+            continue
+    print("Completed yfinance data pull with "+str(len(ticker_df_dict_temp))+" out of "+str(len(tickerStrings)))
+    return ticker_df_dict_temp
+
+ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+
 scheduler = BackgroundScheduler(daemon=True)
+scheduleRunCounter = 1
+
+# @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
+@scheduler.scheduled_job('cron', day_of_week='fri', hour=23, minute=33)
+def scheduled_job():
+    print("**********")
+    print("**********")
+    print("Running job. Time number: "+str(scheduleRunCounter))
+    scheduleRunCounter = scheduleRunCounter+1
+    print("**********")
+    print("**********")
+    tickers_df = pd.read_csv('Tickers/compilation.csv')
+    ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+
+
+scheduler.start()
+# print('normal one')
+# print(table_df)
+# del table_df
+# for tckr in tickers_df['Symbol'].to_list():
+#     try:
+#         dfTemp = yf.download(tckr, threads = False, period='1y', group_by='ticker', threads=False)
+#         dfTemp["Ticker"] = tckr[0]
+#         table_df = df4.append(df3)
+#     except:
+#         pass
+# print('new one')
+# print(table_df)
+
+# scheduler = BackgroundScheduler(daemon=True)
 
 # def updateTableDF():
 #     print('Updating table_df.')
 #     scheduler.print_jobs()
-#     table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
+#     tickers_df = pd.read_csv('Tickers/compilation.csv')
+#     # table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
+#
+#     failedTickers = []
+#     del table_df
+#     for tckr in tickers_df['Symbol'].to_list():
+#         try:
+#             dfTemp = yf.download(tckr, threads = False, period='1y', group_by='ticker', threads=False)
+#             dfTemp["Ticker"] = row[0]
+#             table_df = df4.append(df3)
+#         except:
+#             pass
 
-scheduler.add_job(lambda : print("IS THIS WORKING AHHHHH"),'cron',day_of_week='mon-fri', hour=19, minute=1, timezone='EST')
-# scheduler.add_job(updateTableDF,'cron',hour=2, timezone='EST')
+
 # scheduler.add_job(lambda : scheduler.print_jobs(),'interval',seconds=5)
-scheduler.start()
+# scheduler.add_job(updateTableDF,'cron',hour=2, timezone='EST')
+# scheduler.start()
 
 def getMarketMoverData(category, timeLength):
-    print("*******")
-    print(category)
-    print("*******")
-    return pd.read_csv('Tickers/market_df.csv')
+
+    if timeLength == '1 Day':
+        timeIndex = -1
+    elif timeLength == '1 Week':
+        timeIndex = -5
+    elif timeLength == '1 Month':
+        timeIndex = -24
+    else:
+        timeIndex = 1
+
+    temp_df = tickers_df
+    if category=="Only ETFs":
+        temp_df = tickers_df.loc[tickers_df['ETF'] == 'Y']
+    elif category == "Only Fortune 500":
+        temp_df = tickers_df.loc[tickers_df['Fortune 500'] == 'Y']
+
     table_list = []
-
-    for index, row in tickers_df.iterrows():
-
-        if category=="Only ETFs" and row['ETF'] == 'Y':
-            column = row['Symbol']
-            if timeLength == "1 Day":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-            elif timeLength == "1 Week":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-            elif timeLength == "1 Month":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-            else:
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-            if pd.isna(percentChange) == False:
-                percentChange = round(percentChange, 2)
-                volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-                tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-                table_list.append(tempList)
-        elif category == "Only Fortune 500" and row['Fortune 500'] == 'Y':
-            column = row['Symbol']
-            if timeLength == "1 Day":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-            elif timeLength == "1 Week":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-            elif timeLength == "1 Month":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-            else:
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-            if pd.isna(percentChange) == False:
-                percentChange = round(percentChange, 2)
-                volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-                tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-                table_list.append(tempList)
-        elif category=="Total Market":
-            column = row['Symbol']
-            if timeLength == "1 Day":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-            elif timeLength == "1 Week":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-            elif timeLength == "1 Month":
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-            else:
-                percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-            if pd.isna(percentChange) == False:
-                percentChange = round(percentChange, 2)
-                volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-                tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-                table_list.append(tempList)
+    for tickerString in temp_df['Symbol'].to_list():
+        ticker_df=ticker_df_dict.get(tickerString, pd.DataFrame({'A' : []}))
+        if(ticker_df.empty):
+            break;
+        # print(ticker_df)
+        percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[timeIndex]-1)*100
+        if pd.isna(percentChange) == False:
+            percentChange = round(percentChange, 2)
+            volume = "{:,}".format(int(ticker_df['Volume'].iloc[-1]))
+            tempList = [tickerString, percentChange, round(ticker_df['Adj Close'].iloc[-1],2), volume]
+            table_list.append(tempList)
 
     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
+
+# def getMarketMoverData(category, timeLength):
+#     print("*******")
+#     print(category)
+#     print("*******")
+#     # return pd.read_csv('Tickers/market_df.csv')
+#     table_list = []
+#
+#     start_time = timeit.default_timer()
+#     if timeLength == '1 Day':
+#         timeIndex = -1
+#     elif timeLength == '1 Week':
+#         timeIndex = -7
+#     elif timeLength == '1 Month':
+#         timeIndex = -30
+#     else:
+#         timeIndex = 1
+#
+#     temp_df = tickers_df
+#     if category=="Only ETFs":
+#         temp_df = tickers_df.loc[tickers_df['ETF'] == 'Y']
+#     elif category == "Only Fortune 500":
+#         temp_df = tickers_df.loc[tickers_df['Fortune 500'] == 'Y']
+#
+#     for index, row in temp_df.iterrows():
+#         column = row['Symbol']
+#         percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
+#         if pd.isna(percentChange) == False:
+#             percentChange = round(percentChange, 2)
+#             volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
+#             tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
+#             table_list.append(tempList)
+#     elapsed = timeit.default_timer() - start_time
+#     print("TIME IT TIME:"+str(elapsed))
+#     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
+#
+#     start_time = timeit.default_timer()
+#     for index, row in tickers_df.iterrows():
+#
+#         if category=="Only ETFs" and row['ETF'] == 'Y':
+#             column = row['Symbol']
+#             if timeLength == "1 Day":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
+#             elif timeLength == "1 Week":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
+#             elif timeLength == "1 Month":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
+#             else:
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
+#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
+#
+#             if pd.isna(percentChange) == False:
+#                 percentChange = round(percentChange, 2)
+#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
+#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
+#                 table_list.append(tempList)
+#         elif category == "Only Fortune 500" and row['Fortune 500'] == 'Y':
+#             column = row['Symbol']
+#             if timeLength == "1 Day":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
+#             elif timeLength == "1 Week":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
+#             elif timeLength == "1 Month":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
+#             else:
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
+#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
+#
+#             if pd.isna(percentChange) == False:
+#                 percentChange = round(percentChange, 2)
+#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
+#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
+#                 table_list.append(tempList)
+#         elif category=="Total Market":
+#             column = row['Symbol']
+#             if timeLength == "1 Day":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
+#             elif timeLength == "1 Week":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
+#             elif timeLength == "1 Month":
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
+#             else:
+#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
+#
+#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
+#
+#             if pd.isna(percentChange) == False:
+#                 percentChange = round(percentChange, 2)
+#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
+#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
+#                 table_list.append(tempList)
+#
+#     elapsed = timeit.default_timer() - start_time
+#     print("TIME IT TIME:"+str(elapsed))
+#     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
 
 #app layout
 def make_layout():
@@ -266,7 +402,6 @@ def show_hide_element(value):
      Input('ticker-custom-range', 'end_date'),
      Input('graph-type', 'value')])
 def update_stock_graph(ticker, option, dateSet, dateCustomStart, dateCustomEnd, graphType):
-
     if option == 'Preset':
         interval = '1d'
         if dateSet == "1d":
@@ -299,13 +434,6 @@ def update_stock_graph(ticker, option, dateSet, dateCustomStart, dateCustomEnd, 
             yaxis_title=str(ticker)+' Price in $',
             xaxis_title='Time Period: '+dateSet,
             template='plotly_white',
-            # shapes = [dict(
-            #     x0='2016-12-09', x1='2016-12-09', y0=0, y1=1, xref='x', yref='paper',
-            #     line_width=2)],
-            # annotations=[dict(
-            #     x='2016-12-09', y=0.05, xref='x', yref='paper',
-            #     showarrow=False, xanchor='left', text='Increase Period Begins')]
-            # margin={'t': 40},
             hovermode='x unified'
         )
     else:
@@ -336,15 +464,9 @@ def update_stock_graph(value, period):
 def update_stock_graph2(value, period):
     temp_df = getMarketMoverData(value,period)
     return temp_df.nsmallest(10,'% Change').to_dict('records')
-# get initial data
-# get_new_data()
 
 app.layout = make_layout
 
-# sched.start()
-# executor = ThreadPoolExecutor(max_workers=1)
-# executor.submit(get_new_data_every)
-
 if __name__ == '__main__':
-    # app.run_server(debug=True)
-    app.run_server()
+    app.run_server(debug=True)
+    # app.run_server()
