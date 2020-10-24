@@ -68,16 +68,17 @@ scheduleRunCounter = 1
 # #     print('TestinAHHHHg.')
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=4, minute=51, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=4, minute=56, timezone='UTC')
 def scheduled_job():
     print("**********")
+    print("inside cron job")
     print("**********")
-    print("Running job. Time number: "+str(scheduleRunCounter))
-    scheduleRunCounter = scheduleRunCounter+1
-    print("**********")
-    print("**********")
+#     print("Running job. Time number: "+str(scheduleRunCounter))
+#     scheduleRunCounter = scheduleRunCounter+1
+#     print("**********")
+#     print("**********")
 #     tickers_df = pd.read_csv('Tickers/compilation.csv')
-    ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+#     ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
 scheduler.start()
 
 
@@ -148,101 +149,6 @@ def getMarketMoverData(category, timeLength):
             table_list.append(tempList)
 
     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
-
-# def getMarketMoverData(category, timeLength):
-#     print("*******")
-#     print(category)
-#     print("*******")
-#     # return pd.read_csv('Tickers/market_df.csv')
-#     table_list = []
-#
-#     start_time = timeit.default_timer()
-#     if timeLength == '1 Day':
-#         timeIndex = -1
-#     elif timeLength == '1 Week':
-#         timeIndex = -7
-#     elif timeLength == '1 Month':
-#         timeIndex = -30
-#     else:
-#         timeIndex = 1
-#
-#     temp_df = tickers_df
-#     if category=="Only ETFs":
-#         temp_df = tickers_df.loc[tickers_df['ETF'] == 'Y']
-#     elif category == "Only Fortune 500":
-#         temp_df = tickers_df.loc[tickers_df['Fortune 500'] == 'Y']
-#
-#     for index, row in temp_df.iterrows():
-#         column = row['Symbol']
-#         percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
-#         if pd.isna(percentChange) == False:
-#             percentChange = round(percentChange, 2)
-#             volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-#             tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-#             table_list.append(tempList)
-#     elapsed = timeit.default_timer() - start_time
-#     print("TIME IT TIME:"+str(elapsed))
-#     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
-#
-#     start_time = timeit.default_timer()
-#     for index, row in tickers_df.iterrows():
-#
-#         if category=="Only ETFs" and row['ETF'] == 'Y':
-#             column = row['Symbol']
-#             if timeLength == "1 Day":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-#             elif timeLength == "1 Week":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-#             elif timeLength == "1 Month":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-#             else:
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
-#
-#             if pd.isna(percentChange) == False:
-#                 percentChange = round(percentChange, 2)
-#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-#                 table_list.append(tempList)
-#         elif category == "Only Fortune 500" and row['Fortune 500'] == 'Y':
-#             column = row['Symbol']
-#             if timeLength == "1 Day":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-#             elif timeLength == "1 Week":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-#             elif timeLength == "1 Month":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-#             else:
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
-#
-#             if pd.isna(percentChange) == False:
-#                 percentChange = round(percentChange, 2)
-#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-#                 table_list.append(tempList)
-#         elif category=="Total Market":
-#             column = row['Symbol']
-#             if timeLength == "1 Day":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-1]-1)*100
-#             elif timeLength == "1 Week":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-7]-1)*100
-#             elif timeLength == "1 Month":
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[-30]-1)*100
-#             else:
-#                 percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[1]-1)*100
-#
-#             percentChange = (table_df[column]['Adj Close'].iloc[-1]/table_df[column]['Open'].iloc[timeIndex]-1)*100
-#
-#             if pd.isna(percentChange) == False:
-#                 percentChange = round(percentChange, 2)
-#                 volume = "{:,}".format(int(table_df[column]['Volume'].iloc[-1]))
-#                 tempList = [column, percentChange, round(table_df[column]['Adj Close'].iloc[-1],2), volume]
-#                 table_list.append(tempList)
-#
-#     elapsed = timeit.default_timer() - start_time
-#     print("TIME IT TIME:"+str(elapsed))
-#     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
 
 #app layout
 def make_layout():
