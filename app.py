@@ -68,7 +68,7 @@ scheduleRunCounter = 1
 # #     print('TestinAHHHHg.')
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=4, minute=56, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=4, minute=58, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
