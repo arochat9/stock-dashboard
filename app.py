@@ -21,15 +21,9 @@ server = app.server
 app.title="Stock Dashboard"
 
 #pull all ticker information
-# tickers_df = pd.concat(map(pd.read_csv, ['Tickers/nasdaq.csv', 'Tickers/amex.csv','Tickers/nyse.csv']))
 tickers_df = pd.read_csv('Tickers/compilation_testSize.csv')
-# tickers_df = pd.read_csv('Tickers/compilation.csv')
-#initialize table_df
-# table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
 
 print("Run on server start")
-# table_df = yf.download(tickers=tickers_df['Symbol'].to_list(), period='1y', group_by='ticker', threads=False)
-
 #To supress print lines from yfinance
 # @contextmanager
 # def suppress_stdout():
@@ -60,24 +54,14 @@ ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
 
 
 scheduler = BackgroundScheduler(daemon=True)
-scheduleRunCounter = 1
-
-# # scheduler = BackgroundScheduler(daemon=True)
-# # @scheduler.scheduled_job('cron', hour=4, minute=20, timezone='UTC')
-# # def scheduled_job():
-# #     print('TestinAHHHHg.')
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=5, minute=32, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=7, minute=30, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
     print("**********")
-#     print("Running job. Time number: "+str(scheduleRunCounter))
-#     scheduleRunCounter = scheduleRunCounter+1
-#     print("**********")
-#     print("**********")
-#     tickers_df = pd.read_csv('Tickers/compilation.csv')
+    tickers_df = pd.read_csv('Tickers/compilation.csv')
     ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
     
 scheduler.start()
@@ -105,7 +89,10 @@ def getMarketMoverData(category, timeLength):
         if(ticker_df.empty):
             break;
         # print(ticker_df)
+        if abs(timeIndex) >= len(ticker_df.index):
+            percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[0]-1)*100
         percentChange = (ticker_df['Adj Close'].iloc[-1]/ticker_df['Open'].iloc[timeIndex]-1)*100
+
         if pd.isna(percentChange) == False:
             percentChange = round(percentChange, 2)
             volume = "{:,}".format(int(ticker_df['Volume'].iloc[-1]))
