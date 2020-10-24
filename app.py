@@ -18,7 +18,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 server = app.server
-app.title=Stock Dashboard
+app.title="Stock Dashboard"
 
 #pull all ticker information
 # tickers_df = pd.concat(map(pd.read_csv, ['Tickers/nasdaq.csv', 'Tickers/amex.csv','Tickers/nyse.csv']))
@@ -67,7 +67,7 @@ scheduleRunCounter = 1
 #     print('TestinAHHHHg.')
 
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=4, minute=30, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=4, minute=32, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("**********")
