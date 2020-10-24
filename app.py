@@ -60,8 +60,14 @@ ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
 scheduler = BackgroundScheduler(daemon=True)
 scheduleRunCounter = 1
 
+
+# scheduler = BackgroundScheduler(daemon=True)
+# @scheduler.scheduled_job('cron', hour=4, minute=20, timezone='UTC')
+# def scheduled_job():
+#     print('TestinAHHHHg.')
+
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', day_of_week='fri', hour=23, minute=38)
+@scheduler.scheduled_job('cron', hour=4, minute=22, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("**********")
