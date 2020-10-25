@@ -57,13 +57,22 @@ def createTickerDict(filename):
 createTickerDict('compilation_testSize.csv')
 
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', hour=2, minute=10, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=2, minute=26, timezone='UTC')
+def scheduled_job():
+    print("**********")
+    print("inside cron job")
+    print("**********")
+#     createTickerDict('compilation.csv')
+    createTickerDict('comilation_testSize2.csv')
+
+@scheduler.scheduled_job('cron', hour=2, minute=35, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
     print("**********")
     createTickerDict('compilation.csv')
 #     createTickerDict('comilation_testSize2.csv')
+
 scheduler.start()
 
 def getMarketMoverData(category, timeLength):
