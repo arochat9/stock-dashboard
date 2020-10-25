@@ -13,18 +13,15 @@ import timeit
 from contextlib import contextmanager
 import sys, os
 from tqdm import tqdm
+import pickle
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 server = app.server
-app.title="Stock Dashboard"
+app.title='Stock Dashboard'
 
-#pull all ticker information
-tickers_df = pd.read_csv('Tickers/compilation_testSize.csv')
-
-print("Run on server start")
-# To supress print lines from yfinance
+#To supress print lines from yfinance
 @contextmanager
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
@@ -35,10 +32,15 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-def createTickerDict(tickerStrings):
+
+def createTickerDict(filename):
+
+    tickers_df = pd.read_csv('Tickers/'+filename)
+    tickerStrings = tickers_df['Symbol'].to_list()
+
     ticker_df_dict_temp = {}
     print("Beginning yfinance data pull")
-    for ticker in tickerStrings:# tqdm(tickerStrings):
+    for ticker in tqdm(tickerStrings):
         try:
             with suppress_stdout():
                 data = yf.download(ticker, group_by="Ticker", period='1y')
@@ -47,26 +49,29 @@ def createTickerDict(tickerStrings):
             print(ex)
             continue
     print("Completed yfinance data pull with "+str(len(ticker_df_dict_temp))+" out of "+str(len(tickerStrings)))
-    return ticker_df_dict_temp
 
-ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
+    ticker_df_dict = ticker_df_dict_temp
+    pickle.dump(tickers_df, open("tickers_df.p", "wb" ), protocol=-1)
+    pickle.dump(ticker_df_dict, open("ticker_df_dict.p", "wb" ), protocol=-1)
 
-
+createTickerDict('compilation_testSize.csv')
 
 scheduler = BackgroundScheduler(daemon=True)
-
-# @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=20)
-@scheduler.scheduled_job('cron', hour=18, minute=45, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=1, minute=13, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
     print("**********")
-    tickers_df = pd.read_csv('Tickers/compilation.csv')
-    ticker_df_dict = createTickerDict(tickers_df['Symbol'].to_list())
-    
+    createTickerDict('comilation_testSize2.csv')
 scheduler.start()
 
 def getMarketMoverData(category, timeLength):
+
+    tickers_df = pickle.load( open("tickers_df.p", "rb") )
+    ticker_df_dict = pickle.load( open("ticker_df_dict.p", "rb") )
+
+    print("length of dict in market mover")
+    print(len(ticker_df_dict))
 
     if timeLength == '1 Day':
         timeIndex = -1
@@ -105,6 +110,10 @@ def getMarketMoverData(category, timeLength):
 #app layout
 def make_layout():
     return html.Div(children=[
+
+    # html.Div(id='intermediate-value1', style={'display': 'none'}, children = [pickle.load( open("tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
+    # html.Div(id='intermediate-value2', style={'display': 'none'}, children = pickle.load( open( "ticker_df_dict.p", "rb" ) )),
+
     html.H1(children='Stock Dashboard'),
 
     html.Div(children='''
@@ -116,7 +125,7 @@ def make_layout():
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
             dcc.Dropdown(
                 id='ticker-name',
-                options=[{'label': str(row['Name'])+" ("+str(row['Symbol'])+")", 'value': row['Symbol']} for index, row in tickers_df.iterrows()],
+                options=[{'label': str(row['Name'])+" ("+str(row['Symbol'])+")", 'value': row['Symbol']} for index, row in (pickle.load( open("tickers_df.p", "rb"))).iterrows()],
                 value='SPY',
                 placeholder='stock/ETF (such as SPY)',
                 # optionHeight=50
@@ -316,7 +325,8 @@ def update_stock_graph(ticker, option, dateSet, dateCustomStart, dateCustomEnd, 
 @app.callback(
     Output('marketmover_table1', 'data'),
     [Input('marketGainer-cat1', 'value'),
-     Input('marketGainer-cat2', 'value')])
+     Input('marketGainer-cat2', 'value'),
+     ])
 def update_stock_graph(value, period):
     temp_df = getMarketMoverData(value,period)
     return temp_df.nlargest(10,'% Change').to_dict('records')
@@ -325,7 +335,8 @@ def update_stock_graph(value, period):
 @app.callback(
     Output('marketmover_table2', 'data'),
     [Input('marketLoser-cat1', 'value'),
-     Input('marketLoser-cat2', 'value')])
+     Input('marketLoser-cat2', 'value'),
+      ])
 def update_stock_graph2(value, period):
     temp_df = getMarketMoverData(value,period)
     return temp_df.nsmallest(10,'% Change').to_dict('records')
@@ -333,5 +344,5 @@ def update_stock_graph2(value, period):
 app.layout = make_layout
 
 if __name__ == '__main__':
-#     app.run_server(debug=True)
+    # app.run_server(debug=True)
     app.run_server()
