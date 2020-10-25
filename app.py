@@ -62,7 +62,8 @@ def scheduled_job():
     print("**********")
     print("inside cron job")
     print("**********")
-    createTickerDict('comilation_testSize2.csv')
+    createTickerDict('compilation.csv')
+#     createTickerDict('comilation_testSize2.csv')
 scheduler.start()
 
 def getMarketMoverData(category, timeLength):
