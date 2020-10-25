@@ -57,7 +57,7 @@ def createTickerDict(filename):
 createTickerDict('compilation_testSize.csv')
 
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', hour=1, minute=45, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=2, minute=10, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
