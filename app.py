@@ -123,7 +123,7 @@ def createTickerDict(filename):
             temp_tickers_df = temp_tickers_df.append(df)
 
         if (count % 2) == 0:
-            getEverythingFromMarketMover(tickers_df,ticker_df_dict)
+            getEverythingFromMarketMover(tickers_df,ticker_df_dict_temp)
         count = count + 1
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
@@ -140,7 +140,7 @@ createTickerDict('compilation_testSize.csv')
 # createTickerDict('compilation.csv')
 
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', hour=21, minute=15, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=22, minute=0, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -162,7 +162,7 @@ def make_layout():
     html.Div(children='''
         Built with Dash: A web application framework for Python.
     '''),
-    html.H3("Pricing Graph and Market Mover Table (Currently "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211)"),
+    html.H3("Pricing Graph and Market Mover Table (Currently updating, at "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks)"),
     html.Div([
         html.Div([
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
