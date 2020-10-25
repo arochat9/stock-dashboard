@@ -51,13 +51,13 @@ def createTickerDict(filename):
     print("Completed yfinance data pull with "+str(len(ticker_df_dict_temp))+" out of "+str(len(tickerStrings)))
 
     ticker_df_dict = ticker_df_dict_temp
-    pickle.dump(tickers_df, open("tickers_df.p", "wb" ), protocol=-1)
-    pickle.dump(ticker_df_dict, open("ticker_df_dict.p", "wb" ), protocol=-1)
+    pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
+    pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 createTickerDict('compilation_testSize.csv')
 
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', hour=1, minute=37, timezone='UTC')
+@scheduler.scheduled_job('cron', hour=1, minute=45, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -67,8 +67,8 @@ scheduler.start()
 
 def getMarketMoverData(category, timeLength):
 
-    tickers_df = pickle.load( open("tickers_df.p", "rb") )
-    ticker_df_dict = pickle.load( open("ticker_df_dict.p", "rb") )
+    tickers_df = pickle.load( open("pickleFiles/tickers_df.p", "rb") )
+    ticker_df_dict = pickle.load( open("pickleFiles/ticker_df_dict.p", "rb") )
 
     print("length of dict in market mover")
     print(len(ticker_df_dict))
@@ -111,8 +111,8 @@ def getMarketMoverData(category, timeLength):
 def make_layout():
     return html.Div(children=[
 
-    # html.Div(id='intermediate-value1', style={'display': 'none'}, children = [pickle.load( open("tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
-    # html.Div(id='intermediate-value2', style={'display': 'none'}, children = pickle.load( open( "ticker_df_dict.p", "rb" ) )),
+    # html.Div(id='intermediate-value1', style={'display': 'none'}, children = [pickle.load( open("pickleFiles/tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
+    # html.Div(id='intermediate-value2', style={'display': 'none'}, children = pickle.load( open( "pickleFiles/ticker_df_dict.p", "rb" ) )),
 
     html.H1(children='Stock Dashboard'),
 
@@ -125,7 +125,7 @@ def make_layout():
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
             dcc.Dropdown(
                 id='ticker-name',
-                options=[{'label': str(row['Name'])+" ("+str(row['Symbol'])+")", 'value': row['Symbol']} for index, row in (pickle.load( open("tickers_df.p", "rb"))).iterrows()],
+                options=[{'label': str(row['Name'])+" ("+str(row['Symbol'])+")", 'value': row['Symbol']} for index, row in (pickle.load( open("pickleFiles/tickers_df.p", "rb"))).iterrows()],
                 value='SPY',
                 placeholder='stock/ETF (such as SPY)',
                 # optionHeight=50
