@@ -36,14 +36,8 @@ def suppress_stdout():
 
 #organizes data to see percent change for different stocks
 def getMarketMoverData(category, timeLength, data1, data2):
-
     tickers_df = data1
     ticker_df_dict = data2
-    # tickers_df = pickle.load( open("pickleFiles/tickers_df.p", "rb") )
-    # ticker_df_dict = pickle.load( open("pickleFiles/ticker_df_dict.p", "rb") )
-
-    # print("length of dict in market mover")
-    # print(len(ticker_df_dict))
 
     if timeLength == '1 Day':
         timeIndex = -1
@@ -135,12 +129,12 @@ def createTickerDict(filename):
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
     getEverythingFromMarketMover(tickers_df,ticker_df_dict)
 
-
-createTickerDict('compilation_testSize.csv')
+# createTickerDict('compilation_testSize.csv')
 # createTickerDict('compilation.csv')
 
+# Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', hour=22, minute=0, timezone='UTC')
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=21, minute=30, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -157,12 +151,15 @@ def make_layout():
     # html.Div(id='intermediate-value1', style={'display': 'none'}, children = [pickle.load( open("pickleFiles/tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
     # html.Div(id='intermediate-value2', style={'display': 'none'}, children = pickle.load( open( "pickleFiles/ticker_df_dict.p", "rb" ) )),
 
-    html.H1(children='Stock Dashboard'),
+    html.Img(src=app.get_asset_url('my-logo.jpeg'), style={'width':'100px', 'position':'absolute','top':'50px','left':'5%', 'borderRadius':'20px'}),
+
+    html.H1(children='Stock Dashboard', style={'fontSize':'60px','marginTop':'50px','marginBottom':0,'marginLeft':'110px', 'color':'rgb(0,83,148)','fontWeight':'700'}),
 
     html.Div(children='''
         Built with Dash: A web application framework for Python.
-    '''),
-    html.H3("Pricing Graph and Market Mover Table (Currently updating, at "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks)"),
+    ''', style={'float':'clear','marginLeft':'110px'}),
+    html.H3("Pricing Graph and Market Mover Table",  style={'marginTop':'30px','marginBottom':'0px', 'color':'rgb(103,144,153)'}),
+    html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
     html.Div([
         html.Div([
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
@@ -392,5 +389,5 @@ app.layout = make_layout
 
 if __name__ == '__main__':
     # app.run_server(use_reloader=False, debug=True)
-    # app.run_server(debug=True)
-    app.run_server(use_reloader=False)
+    app.run_server(debug=True)
+    # app.run_server(use_reloader=False)
