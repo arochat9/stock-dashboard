@@ -110,8 +110,8 @@ def createTickerDict(filename):
             except Exception as ex:
                 print(ex)
                 continue
-        print("Completed section.")
-        print("Finished "+str(500*count)+" tickers so far")
+        print("Completed Section.")
+        print("Finished "+str(500*count)+" Tickers so far")
         if (temp_tickers_df.empty):
             temp_tickers_df = df
         else:
