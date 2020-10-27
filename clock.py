@@ -124,7 +124,7 @@ def createTickerDict(filename):
 
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler()
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=4, minute=45, timezone='UTC')
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=5, minute=15, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -135,8 +135,8 @@ def scheduled_job():
 def timed_job():
     print('This job is run every  minute.')
 
-# def startScheduler():
-scheduler.start()
+def startScheduler():
+    scheduler.start()
 
 # while True:
 #     pass
