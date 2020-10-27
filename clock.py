@@ -123,7 +123,7 @@ def createTickerDict(filename):
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 # Here is the cron job so that the table can update once a day
-scheduler = BackgroundScheduler(daemon=True)
+scheduler = BackgroundScheduler()
 @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=4, minute=45, timezone='UTC')
 def scheduled_job():
     print("**********")
