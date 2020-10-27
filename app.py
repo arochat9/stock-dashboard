@@ -136,16 +136,8 @@ def createTickerDict(filename):
 
 # createTickerDict('compilation_testSize.csv')
 # createTickerDict('compilation.csv')
-
-# Here is the cron job so that the table can update once a day
-scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=3, minute=15, timezone='UTC')
-def scheduled_job():
-    print("**********")
-    print("inside cron job")
-    print("**********")
-    # createTickerDict('compilation.csv')
-scheduler.start()
+def testMethod(string):
+    print(string)
 
 #app layout
 def make_layout():
