@@ -1,5 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import date
+import datetime
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -117,24 +118,28 @@ def createTickerDict(filename):
             temp_tickers_df = temp_tickers_df.append(df)
 
         if (count % 2) == 0:
-            getEverythingFromMarketMover(tickers_df,ticker_df_dict_temp)
+            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp)
         count = count + 1
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
+        today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+        pickle.dump(today1, open('pickleFiles/datetime','wb') )
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
     print("Completed yfinance data pull")
 
     ticker_df_dict = ticker_df_dict_temp
-    pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-    # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
     getEverythingFromMarketMover(tickers_df,ticker_df_dict)
+    pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
+    today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+    pickle.dump(today1, open('pickleFiles/datetime','wb') )
+    # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 # createTickerDict('compilation_testSize.csv')
 # createTickerDict('compilation.csv')
 
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=21, minute=30, timezone='UTC')
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=1, minute=30, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -159,13 +164,13 @@ def make_layout():
         Built with Dash: A web application framework for Python.
     ''', style={'float':'clear','marginLeft':'110px'}),
     html.H3("Pricing Graph and Market Mover Table",  style={'marginTop':'30px','marginBottom':'0px', 'color':'rgb(103,144,153)'}),
-    html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
+    html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded. Last pull: "+str(pickle.load(open('pickleFiles/datetime','rb'))), style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
     html.Div([
         html.Div([
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
             dcc.Dropdown(
                 id='ticker-name',
-                options=[{'label': str(row['Name'])+" ("+str(row['Symbol'])+")", 'value': row['Symbol']} for index, row in (pickle.load( open("pickleFiles/tickers_df.p", "rb"))).iterrows()],
+                options=[{'label': str(row['Symbol']) +" - "+str(row['Name']), 'value': row['Symbol']} for index, row in (pickle.load( open("pickleFiles/tickers_df.p", "rb"))).iterrows()],
                 value='SPY',
                 placeholder='stock/ETF (such as SPY)',
                 # optionHeight=50
@@ -389,5 +394,5 @@ app.layout = make_layout
 
 if __name__ == '__main__':
     # app.run_server(use_reloader=False, debug=True)
-#     app.run_server(debug=True)
+    # app.run_server(debug=True)
     app.run_server(use_reloader=False)
