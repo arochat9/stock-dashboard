@@ -11,7 +11,8 @@ import pandas as pd
 import yfinance as yf
 import requests
 import pytz
-from data import settimeOfLastUpdate
+# from data import settimeOfLastUpdate
+import json
 
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
