@@ -111,7 +111,7 @@ def createTickerDict(filename):
             getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp)
         count = count + 1
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-        today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+        today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
         pickle.dump(today1, open('pickleFiles/datetime','wb') )
         print("Completed Pickle dumps")
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
@@ -121,7 +121,7 @@ def createTickerDict(filename):
     ticker_df_dict = ticker_df_dict_temp
     getEverythingFromMarketMover(tickers_df,ticker_df_dict)
     pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-    today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+    today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
     pickle.dump(today1, open('pickleFiles/datetime','wb') )
     print("Completed final Pickle dumps")
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
@@ -140,6 +140,9 @@ def test():
     print("**********")
     print("inside cron job number 2")
     print("**********")
+    today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+    pickle.dump(today1, open('pickleFiles/datetime','wb') )
+    print('completed pickle time dump')
 
 scheduler.start()
 
@@ -148,8 +151,18 @@ sched = BlockingScheduler()
 @sched.scheduled_job('interval', minutes=1)
 def timed_job():
     print('This job is run every minute')
-    response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
-    print(response)
+
+    timeNow = datetime.datetime.now(EST)
+    timeStart = '2:00PM'
+    timeEnd = '3:00PM'
+    timeEnd = datetime.strptime(timeEnd, "%I:%M%p")
+    timeStart = datetime.strptime(timeStart, "%I:%M%p")
+
+    if timeNow > timeStart and timeNow < timeEnd:
+        print('In downtime window')
+    else:
+        response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
+        print(response)
 
 sched.start()
 

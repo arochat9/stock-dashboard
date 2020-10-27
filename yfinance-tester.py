@@ -6,6 +6,7 @@ import pickle
 import timeit
 import datetime
 from sys import getsizeof
+import pytz
 
 # newtime = yf.download("SPY", period='1d')
 # print(newtime)
@@ -15,16 +16,17 @@ print("********")
 # print(pickle.load( open("pickleFiles/ticker_df_dict.p", "rb") ))
 print("********")
 
-marketMoverdf = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
+# marketMoverdf = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
 
 # today1 = datetime.datetime.today().strftime("%Y-%m-%d %H:%M")
 # pickle.dump(today1, open('pickleFiles/datetime','wb') )
 #
-# # print(datetime.datetime.today().strftime("%Y-%m-%d %H:%M"))
-today2 = pickle.load(open('pickleFiles/datetime','rb'))
-print(today2)
 
-print(marketMoverdf[('Total Market', '1 Day')])
+print(today1)
+# today2 = pickle.load(open('pickleFiles/datetime','rb'))
+# print(today2)
+
+# print(marketMoverdf[('Total Market', '1 Day')])
 # print(pickle.load( open("pickleFiles/tickers_df.p", "rb") ))
 
 # tickers_df = pickle.load( open("pickleFiles/tickers_df full.p", "rb") )

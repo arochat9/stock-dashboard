@@ -25,6 +25,7 @@ server = app.server
 app.title='Stock Dashboard'
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
+EST = pytz.timezone('America/New_York')
 
 # To supress print lines from yfinance
 @contextmanager
@@ -123,7 +124,7 @@ def createTickerDict(filename):
             getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp)
         count = count + 1
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-        today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+        today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
         pickle.dump(today1, open('pickleFiles/datetime','wb') )
         print("Completed Pickle dumps")
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
@@ -133,7 +134,7 @@ def createTickerDict(filename):
     ticker_df_dict = ticker_df_dict_temp
     getEverythingFromMarketMover(tickers_df,ticker_df_dict)
     pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-    today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
+    today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
     pickle.dump(today1, open('pickleFiles/datetime','wb') )
     print("Completed final Pickle dumps")
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
