@@ -9,22 +9,38 @@ from sys import getsizeof
 import pytz
 import json
 
-EST = pytz.timezone('America/New_York')
-today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-print("********")
-print(today1)
-# with open('JSON Files/datetime.json', 'w') as fp:
-#     json.dump(str(today1), fp)
-with open("JSON Files/datetime.txt", "w+") as f:
-    f.write(today1)
+# EST = pytz.timezone('America/New_York')
+# today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+# print("********")
+# print(today1)
+# # with open('JSON Files/datetime.json', 'w') as fp:
+# #     json.dump(str(today1), fp)
+# with open("JSON Files/datetime.txt", "w+") as f:
+#     f.write(today1)
+#
+# from data import settimeOfLastUpdate, gettimeOfLastUpdate
+#
+# EST = pytz.timezone('America/New_York')
+# today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+# settimeOfLastUpdate(today1)
+#
+# print(gettimeOfLastUpdate())
 
-from data import settimeOfLastUpdate, gettimeOfLastUpdate
 
-EST = pytz.timezone('America/New_York')
-today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-settimeOfLastUpdate(today1)
+dashInfo_dictSTART = {
+    'time':'not set',
+    'number':'not set',
+    'tickers':'not set'
+}
+with open('JSON Files/dashInfo_dict.json', 'w') as data:
+    json.dump(dashInfo_dictSTART, data)
 
-print(gettimeOfLastUpdate())
+# with open('JSON Files/dashInfo_dict.json', 'w') as data:
+#     dashInfo_dict = data
+#
+# dashInfo_dict['time'] = 'new time'
+# with open('JSON Files/dashInfo_dict.json', 'w') as data:
+#     json.dump(dashInfo_dict, data)
 
 # marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
 #

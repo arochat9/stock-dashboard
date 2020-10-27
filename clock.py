@@ -163,12 +163,12 @@ def test():
     print("**********")
     print("inside cron job number 2")
     print("**********")
-    today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-    settimeOfLastUpdate(today1)
-    with open("JSON Files/datetime.txt", "w+") as f:
-        f.write(today1)
-    # pickle.dump(today1, open('pickleFiles/datetimeNEW','wb') )
-    print('completed pickle time dump')
+    # today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+    # settimeOfLastUpdate(today1)
+    # with open("JSON Files/datetime.txt", "w+") as f:
+    #     f.write(today1)
+    # # pickle.dump(today1, open('pickleFiles/datetimeNEW','wb') )
+    # print('completed pickle time dump')
 
 
 scheduler.start()
@@ -177,8 +177,16 @@ sched = BlockingScheduler()
 # scheduler = BlockingScheduler()
 @sched.scheduled_job('interval', minutes=1)
 def timed_job():
-    print('This job is run every minute')
 
+    dashInfo_dictSTART = {
+        'time':'PLZ',
+        'number':'PLZ',
+        'tickers':'PLZ'
+    }
+    with open('JSON Files/dashInfo_dict.json', 'w') as data:
+        json.dump(dashInfo_dictSTART, data)
+
+    print('This job is run every minute')
     timeNow = datetime.datetime.now(EST)
     timeNow = timeNow.strftime("%H:%M")
     timeNow = datetime.datetime.strptime(timeNow, "%H:%M")
