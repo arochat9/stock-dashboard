@@ -147,8 +147,8 @@ def scheduled_job():
     print("inside cron job")
     print("**********")
     createTickerDict('compilation.csv')
-startScheduler()
-
+# startScheduler()
+scheduler.start()
 #app layout
 def make_layout():
     return html.Div(children=[
