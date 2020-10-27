@@ -125,6 +125,7 @@ def createTickerDict(filename):
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
         today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
         pickle.dump(today1, open('pickleFiles/datetime','wb') )
+        print("Completed Pickle dumps")
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
     print("Completed yfinance data pull")
@@ -134,21 +135,23 @@ def createTickerDict(filename):
     pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
     today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
     pickle.dump(today1, open('pickleFiles/datetime','wb') )
+    print("Completed final Pickle dumps")
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 # createTickerDict('compilation_testSize.csv')
 # createTickerDict('compilation.csv')
 
-scheduler = BackgroundScheduler(daemon=True)
-# scheduler = BlockingScheduler()
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=10, minute=0, timezone='UTC')
-def scheduled_job():
-    print("**********")
-    print("inside cron job")
-    print("**********")
-    createTickerDict('compilation.csv')
-# startScheduler()
-scheduler.start()
+# scheduler = BackgroundScheduler(daemon=True)
+# # scheduler = BlockingScheduler()
+# @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=10, minute=0, timezone='UTC')
+# def scheduled_job():
+#     print("**********")
+#     print("inside cron job")
+#     print("**********")
+#     createTickerDict('compilation.csv')
+# # startScheduler()
+# scheduler.start()
+
 #app layout
 def make_layout():
     return html.Div(children=[
