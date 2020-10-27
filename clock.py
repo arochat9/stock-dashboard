@@ -1,5 +1,6 @@
 # from app import createTickerDict, testMethod
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import date
 import datetime
 from contextlib import contextmanager
@@ -123,7 +124,8 @@ def createTickerDict(filename):
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 # Here is the cron job so that the table can update once a day
-scheduler = BackgroundScheduler()
+# scheduler = BackgroundScheduler(daemon=True)
+scheduler = BlockingScheduler()
 @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=5, minute=18, timezone='UTC')
 def scheduled_job():
     print("**********")
@@ -135,8 +137,8 @@ def scheduled_job():
 def timed_job():
     print('This job is run every  minute.')
 
-def startScheduler():
-    scheduler.start()
+# def startScheduler():
+scheduler.start()
 
 # while True:
 #     pass

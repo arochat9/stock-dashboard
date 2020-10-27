@@ -15,7 +15,7 @@ from contextlib import contextmanager
 import sys, os
 from tqdm import tqdm
 import pickle
-from clock import startScheduler
+# from clock import startScheduler
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -141,7 +141,7 @@ timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
 # def testMethod(string):
 #     print(string)
 
-startScheduler()
+# startScheduler()
 #app layout
 def make_layout():
     return html.Div(children=[
