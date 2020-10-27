@@ -15,6 +15,7 @@ from contextlib import contextmanager
 import sys, os
 from tqdm import tqdm
 import pickle
+from clock.py import *
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -138,6 +139,8 @@ def createTickerDict(filename):
 # createTickerDict('compilation.csv')
 def testMethod(string):
     print(string)
+
+clock.scheduler.start()
 
 #app layout
 def make_layout():
