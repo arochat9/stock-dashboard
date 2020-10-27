@@ -113,6 +113,7 @@ def createTickerDict(filename):
         pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
         today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
         pickle.dump(today1, open('pickleFiles/datetime','wb') )
+        print("Completed Pickle dumps")
         # pickle.dump(ticker_df_dict_temp, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
     print("Completed yfinance data pull")
@@ -122,18 +123,25 @@ def createTickerDict(filename):
     pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
     today1 = datetime.datetime.today().strftime("%Y-%m-%d %I:%M %p")
     pickle.dump(today1, open('pickleFiles/datetime','wb') )
+    print("Completed final Pickle dumps")
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
 
 # Here is the cron job so that the table can update once a day
-# scheduler = BackgroundScheduler(daemon=True)
-# # scheduler = BlockingScheduler()
+scheduler = BackgroundScheduler(daemon=True)
+# scheduler = BlockingScheduler()
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=5, minute=18, timezone='UTC')
 # def scheduled_job():
 #     print("**********")
 #     print("inside cron job")
 #     print("**********")
 #     createTickerDict('compilation.csv')
-# scheduler.start()
+@scheduler.scheduled_job('interval', minutes=2)
+def test():
+    print("**********")
+    print("inside cron job number 2")
+    print("**********")
+
+scheduler.start()
 
 sched = BlockingScheduler()
 # scheduler = BlockingScheduler()
