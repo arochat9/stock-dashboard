@@ -15,12 +15,13 @@ from contextlib import contextmanager
 import sys, os
 from tqdm import tqdm
 import pickle
-from clock.py import *
+from clock import *
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
 server = app.server
+
+
 app.title='Stock Dashboard'
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
@@ -140,8 +141,7 @@ timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
 # def testMethod(string):
 #     print(string)
 
-# clock.scheduler.start()
-
+clock.startScheduler()
 #app layout
 def make_layout():
     return html.Div(children=[

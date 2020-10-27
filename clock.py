@@ -130,4 +130,6 @@ def scheduled_job():
     print("inside cron job")
     print("**********")
     # createTickerDict('compilation.csv')
-scheduler.start()
+
+def startScheduler():
+    scheduler.start()
