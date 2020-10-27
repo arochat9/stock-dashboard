@@ -14,7 +14,7 @@ import pytz
 
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
-
+EST = pytz.timezone('America/New_York')
 
 #To supress print lines from yfinance
 @contextmanager
