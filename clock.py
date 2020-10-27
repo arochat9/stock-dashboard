@@ -131,8 +131,12 @@ def scheduled_job():
     print("**********")
     # createTickerDict('compilation.csv')
 
-def startScheduler():
-    scheduler.start()
+@scheduler.scheduled_job('interval', minutes=1)
+def timed_job():
+    print('This job is run every  minute.')
+
+# def startScheduler():
+scheduler.start()
 
 # while True:
 #     pass
