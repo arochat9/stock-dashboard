@@ -141,7 +141,7 @@ timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
 # def testMethod(string):
 #     print(string)
 
-clock.startScheduler()
+startScheduler()
 #app layout
 def make_layout():
     return html.Div(children=[
