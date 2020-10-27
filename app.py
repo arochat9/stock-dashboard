@@ -171,7 +171,7 @@ def make_layout():
         Built with Dash: A web application framework for Python.
     ''', style={'float':'clear','marginLeft':'110px'}),
     html.H3("Pricing Graph and Market Mover Table",  style={'marginTop':'30px','marginBottom':'0px', 'color':'rgb(103,144,153)'}),
-    html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded. Last pull: "+str(pickle.load(open('pickleFiles/datetime','rb'))), style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
+    html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded. Last pull: "+str(pickle.load(open('pickleFiles/datetime','rb'))+" EST"), style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
     html.Div([
         html.Div([
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",

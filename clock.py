@@ -137,14 +137,15 @@ scheduler = BackgroundScheduler(daemon=True)
 #     print("inside cron job")
 #     print("**********")
 #     createTickerDict('compilation.csv')
-@scheduler.scheduled_job('interval', minutes=2)
+@scheduler.scheduled_job('interval', minutes=1)
 def test():
     print("**********")
     print("inside cron job number 2")
     print("**********")
     today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-    pickle.dump(today1, open('pickleFiles/datetime','wb') )
+    pickle.dump(today1, open('pickleFiles/datetimeNEW','wb') )
     print('completed pickle time dump')
+
 
 scheduler.start()
 
