@@ -10,9 +10,11 @@ import pickle
 import pandas as pd
 import yfinance as yf
 import requests
+import pytz
 
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
+
 
 #To supress print lines from yfinance
 @contextmanager
@@ -153,11 +155,15 @@ def timed_job():
     print('This job is run every minute')
 
     timeNow = datetime.datetime.now(EST)
+    timeNow = timeNow.strftime("%H:%M")
+    timeNow = datetime.datetime.strptime(timeNow, "%H:%M")
     timeStart = '2:00PM'
-    timeEnd = '3:00PM'
-    timeEnd = datetime.strptime(timeEnd, "%I:%M%p")
-    timeStart = datetime.strptime(timeStart, "%I:%M%p")
-
+    timeEnd = '4:00PM'
+    timeEnd = datetime.datetime.strptime(timeEnd, "%I:%M%p")
+    timeStart = datetime.datetime.strptime(timeStart, "%I:%M%p")
+    print(timeNow)
+    print(timeStart)
+    print(timeEnd)
     if timeNow > timeStart and timeNow < timeEnd:
         print('In downtime window')
     else:

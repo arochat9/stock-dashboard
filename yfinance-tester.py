@@ -8,13 +8,30 @@ import datetime
 from sys import getsizeof
 import pytz
 
+EST = pytz.timezone('America/New_York')
+
+timeNow = datetime.datetime.now(EST)
+timeNow = timeNow.strftime("%H:%M")
+timeNow = datetime.datetime.strptime(timeNow, "%H:%M")
+timeStart = '2:00PM'
+timeEnd = '3:00PM'
+timeEnd = datetime.datetime.strptime(timeEnd, "%I:%M%p")
+timeStart = datetime.datetime.strptime(timeStart, "%I:%M%p")
+print(timeNow)
+print(timeStart)
+print(timeEnd)
+if timeNow > timeStart and timeNow < timeEnd:
+    print('In downtime window')
+else:
+    response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
+    print(response)
 # newtime = yf.download("SPY", period='1d')
 # print(newtime)
 # tickers_df = pd.read_csv('Tickers/compilation_testSize.csv')
 
-print("********")
+# print("********")
 # print(pickle.load( open("pickleFiles/ticker_df_dict.p", "rb") ))
-print("********")
+# print("********")
 
 # marketMoverdf = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
 
@@ -22,7 +39,7 @@ print("********")
 # pickle.dump(today1, open('pickleFiles/datetime','wb') )
 #
 
-print(today1)
+# print(today1)
 # today2 = pickle.load(open('pickleFiles/datetime','rb'))
 # print(today2)
 
