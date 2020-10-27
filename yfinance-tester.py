@@ -7,24 +7,46 @@ import timeit
 import datetime
 from sys import getsizeof
 import pytz
+import json
 
 EST = pytz.timezone('America/New_York')
+today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+print("********")
+print(today1)
+# with open('JSON Files/datetime.json', 'w') as fp:
+#     json.dump(str(today1), fp)
+with open("JSON Files/datetime.txt", "w+") as f:
+    f.write(today1)
 
-timeNow = datetime.datetime.now(EST)
-timeNow = timeNow.strftime("%H:%M")
-timeNow = datetime.datetime.strptime(timeNow, "%H:%M")
-timeStart = '2:00PM'
-timeEnd = '3:00PM'
-timeEnd = datetime.datetime.strptime(timeEnd, "%I:%M%p")
-timeStart = datetime.datetime.strptime(timeStart, "%I:%M%p")
-print(timeNow)
-print(timeStart)
-print(timeEnd)
-if timeNow > timeStart and timeNow < timeEnd:
-    print('In downtime window')
-else:
-    response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
-    print(response)
+from data import settimeOfLastUpdate, gettimeOfLastUpdate
+
+EST = pytz.timezone('America/New_York')
+today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+settimeOfLastUpdate(today1)
+
+print(gettimeOfLastUpdate())
+
+# marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
+#
+# new_marketMoverData_dict = {}
+#
+# for key in marketMoverData_dict.keys():
+#     print(key)
+#     new_marketMoverData_dict[key[0]+"-"+key[1]] = (marketMoverData_dict.get(key)).to_json()
+#
+# for key in new_marketMoverData_dict.keys():
+#     print(key)
+#
+# with open('JSON Files/marketMoverData_dict.json', 'w') as fp:
+#     json.dump(new_marketMoverData_dict, fp)
+#
+# with open('JSON Files/marketMoverData_dict.json') as json_file: data = json.load(json_file)
+#     # print(data)
+#
+# # data = json.load('JSON Files/marketMoverData_dict.json')
+#
+# print(pd.read_json(data['Only ETFs-1 Day']))
+
 # newtime = yf.download("SPY", period='1d')
 # print(newtime)
 # tickers_df = pd.read_csv('Tickers/compilation_testSize.csv')
