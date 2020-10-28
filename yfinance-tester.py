@@ -8,6 +8,83 @@ import datetime
 from sys import getsizeof
 import pytz
 import json
+import sqlalchemy
+import os
+from worker import getMostRecentPull, enterElement
+
+def createTables():
+    engine = sqlalchemy.create_engine("postgresql://postgres:Maroon6248@localhost/dashboard-database")
+    con = engine.connect()
+    # print(engine.table_names())
+
+    with open('JSON Files/marketMoverData_dict.json') as json_file:
+        data = json.load(json_file)
+
+    for key in data.keys():
+        df = pd.read_json(data[key])
+        df = df.rename({'% Change': 'Percent Change'}, axis=1)  # new method
+        table_name = key
+        df.to_sql(table_name, con, if_exists='replace')
+
+    print(engine.table_names())
+    con.close()
+# createTables()
+
+def getTopData():
+    engine = sqlalchemy.create_engine("postgresql://postgres:Maroon6248@localhost/dashboard-database")
+    con = engine.connect()
+    var = 'Total Market-1 Day'
+    dataFrame = pd.read_sql("select * from \""+var+"\"", con);
+    con.close()
+    return dataFrame.nsmallest(10,'Percent Change')
+
+# number=4
+# timeTaken = timeit.timeit(getMostRecentPull, number=number)
+# print("AVG TIME TAKEN for new method")
+# print(timeTaken/number)
+
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Date
+# DATABASE_URL = os.environ['postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv']
+URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
+
+# enterElement("testing",1)
+
+# Base = declarative_base()
+#
+# class Book(Base):
+#     __tablename__ = 'dashInfo_table'
+#     id = Column(Integer, primary_key=True)
+#     title = Column(String)
+#     author = Column(String)
+#     pages = Column(Integer)
+#     published = Column(Date)
+#
+#     def __repr__(self):
+#         return "<Book(title='{}', author='{}', pages={}, published={})>"\
+#                 .format(self.title, self.author, self.pages, self.published)
+#
+# engine = create_engine(URL)
+# Base.metadata.create_all(engine)
+
+# Total Market-1 Day
+# Total Market-1 Week
+# Total Market-1 Month
+# Total Market-1 Year
+# Only ETFs-1 Day
+# Only ETFs-1 Week
+# Only ETFs-1 Month
+# Only ETFs-1 Year
+# Only Fortune 500-1 Day
+# Only Fortune 500-1 Week
+# Only Fortune 500-1 Month
+# Only Fortune 500-1 Year
+
+
+
+
+
 
 # EST = pytz.timezone('America/New_York')
 # today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
@@ -27,13 +104,13 @@ import json
 # print(gettimeOfLastUpdate())
 
 
-dashInfo_dictSTART = {
-    'time':'not set',
-    'number':'not set',
-    'tickers':'not set'
-}
-with open('JSON Files/dashInfo_dict.json', 'w') as data:
-    json.dump(dashInfo_dictSTART, data)
+# dashInfo_dictSTART = {
+#     'time':'not set',
+#     'number':'not set',
+#     'tickers':'not set'
+# }
+# with open('JSON Files/dashInfo_dict.json', 'w') as data:
+#     json.dump(dashInfo_dictSTART, data)
 
 # with open('JSON Files/dashInfo_dict.json', 'w') as data:
 #     dashInfo_dict = data
@@ -56,7 +133,8 @@ with open('JSON Files/dashInfo_dict.json', 'w') as data:
 # with open('JSON Files/marketMoverData_dict.json', 'w') as fp:
 #     json.dump(new_marketMoverData_dict, fp)
 #
-# with open('JSON Files/marketMoverData_dict.json') as json_file: data = json.load(json_file)
+# with open('JSON Files/marketMoverData_dict.json') as json_file:
+    # data = json.load(json_file)
 #     # print(data)
 #
 # # data = json.load('JSON Files/marketMoverData_dict.json')

@@ -17,8 +17,8 @@ from tqdm import tqdm
 import pickle
 import pytz
 import json
-
-from data import gettimeOfLastUpdate
+from worker import getMostRecentPull
+import sqlalchemy
 # from clock import startScheduler
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -28,11 +28,14 @@ server = app.server
 app.title='Stock Dashboard'
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
+tickers_df = pd.read_csv('Tickers/compilation.csv')
+# URL = "postgresql://postgres:Maroon6248@localhost/dashboard-database"
+URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
 
 #app layout
 def make_layout():
+    # update = getMostRecentPull
     return html.Div(children=[
-
     # dcc.Store(id='memory', data=pickle.load( open("pickleFiles/ticker_df_dict full.p", "rb"))  ),
     # dcc.Store(id='memory', data=[pickle.load( open("pickleFiles/tickers_df full.p", "rb") ), pickle.load( open( "pickleFiles/ticker_df_dict full.p", "rb" ) )]  ),
     # html.Div(id='initial_value', style={'display': 'none'}, children = [pickle.load( open("pickleFiles/tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
@@ -48,14 +51,14 @@ def make_layout():
     html.H3("Pricing Graph and Market Mover Table",  style={'marginTop':'30px','marginBottom':'0px', 'color':'rgb(103,144,153)'}),
 
     # html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded. Last pull: "+str(pickle.load(open('pickleFiles/datetime','rb')))+" EST", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
-    html.H6("Currently have "+str("COMEBACKTOTHIS") +" out of 9211 stocks loaded. Last pull: "+str(gettimeOfLastUpdate())+" EST", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
+    html.H6(id="introElement",children=getMostRecentPull(), style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
 
     html.Div([
         html.Div([
             "Search any stock or ETF on NASDAQ, AMEX, or NYSE: ",
             dcc.Dropdown(
                 id='ticker-name',
-                # options=[{'label': str(row['Symbol']) +" - "+str(row['Name']), 'value': row['Symbol']} for index, row in (pickle.load( open("pickleFiles/tickers_df.p", "rb"))).iterrows()],
+                # options=[{'label': str(row['Symbol']) +" - "+str(row['Name']), 'value': row['Symbol']} for index, row in tickers_df.iterrows()],
                 value='SPY',
                 placeholder='stock/ETF (such as SPY)',
                 # optionHeight=50
@@ -128,10 +131,11 @@ def make_layout():
         html.Br(),
         dash_table.DataTable(
             id='marketmover_table1',
-            columns=[{"name": i, "id": i} for i in ['Symbol', '% Change', 'Price', 'Volume']],
+            columns=[{"name": i, "id": i} for i in ['Symbol', 'Percent Change', 'Price', 'Volume']],
             style_header={
                 'fontWeight': 'bold',
                 'fontSize': '18px',
+                'width': '25%',
                 'font-family': "Open Sans, HelveticaNeue, Helvetica Neue"
             },
             style_cell={
@@ -166,12 +170,13 @@ def make_layout():
         html.Br(),
         dash_table.DataTable(
             id='marketmover_table2',
-            columns=[{"name": i, "id": i} for i in ['Symbol', '% Change', 'Price', 'Volume']],
+            columns=[{"name": i, "id": i} for i in ['Symbol', 'Percent Change', 'Price', 'Volume']],
             # columns=[{"name": i, "id": i} for i in market_df.columns],
             # data=market_df.nsmallest(10,'% Change').to_dict('records'),
             style_header={
                 'fontWeight': 'bold',
                 'fontSize': '18px',
+                'width': '25%',
                 'font-family': "Open Sans, HelveticaNeue, Helvetica Neue"
             },
             style_cell={
@@ -184,6 +189,13 @@ def make_layout():
     ], style={'width': '45%', 'display': 'inline-block', 'float':'right', 'border': '4px solid #828282', 'borderRadius': '10px', 'padding': '15px'}),
     html.Div([], style={'padding':60,'clear':'both'})
 ], style={'marginLeft': '5%', 'marginRight': '5%'})
+
+
+@app.callback(
+    Output('ticker-name', 'options'),
+    [Input('introElement', 'children')])
+def set_cities_options(value):
+    return [{'label': str(row['Symbol']) +" - "+str(row['Name']), 'value': row['Symbol']} for index, row in tickers_df.iterrows()]
 
 #callback to hide and unhide picking the date range for the stock graph
 @app.callback([
@@ -257,17 +269,25 @@ def update_stock_graph(ticker, option, dateSet, dateCustomStart, dateCustomEnd, 
     [Input('marketGainer-cat1', 'value'),
      Input('marketGainer-cat2', 'value'),
      ])
-def update_stock_graph(value, period):
+def table1(value, period):
 
-    with open('JSON Files/marketMoverData_dict.json') as json_file:
-        data = json.load(json_file)
+    engine = sqlalchemy.create_engine(URL)
+    con = engine.connect()
+    var = value+"-"+period
+    dataFrame = pd.read_sql("select * from \""+var+"\"", con);
+    con.close()
+    dataFrame = dataFrame.nsmallest(10,'Percent Change')
+    dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
+    return dataFrame.to_dict('records')
+    # with open('JSON Files/marketMoverData_dict.json') as json_file:
+        # data = json.load(json_file)
 
-    temp_df = pd.read_json(data[value+"-"+period])
+    # temp_df = pd.read_json(data[value+"-"+period])
 
     # marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
     # temp_df = marketMoverData_dict[(value,period)]
     # temp_df = getMarketMoverData(value,period, data[0],data[1])
-    return temp_df.nlargest(10,'% Change').to_dict('records')
+    # return temp_df.nlargest(10,'% Change').to_dict('records')
 
 #callback for market loser table
 @app.callback(
@@ -275,17 +295,25 @@ def update_stock_graph(value, period):
     [Input('marketLoser-cat1', 'value'),
      Input('marketLoser-cat2', 'value'),
       ])
-def update_stock_graph2(value, period):
+def table2(value, period):
 
-    with open('JSON Files/marketMoverData_dict.json') as json_file:
-        data = json.load(json_file)
+    engine = sqlalchemy.create_engine(URL)
+    con = engine.connect()
+    var = value+"-"+period
+    dataFrame = pd.read_sql("select * from \""+var+"\"", con);
+    con.close()
+    dataFrame = dataFrame.nsmallest(10,'Percent Change')
+    dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
+    return dataFrame.to_dict('records')
+    # with open('JSON Files/marketMoverData_dict.json') as json_file:
+    #     data = json.load(json_file)
 
-    temp_df = pd.read_json(data[value+"-"+period])
+    # temp_df = pd.read_json(data[value+"-"+period])
 
     # marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
     # temp_df = marketMoverData_dict[(value,period)]
     # temp_df = getMarketMoverData(value,period, data[0],data[1])
-    return temp_df.nsmallest(10,'% Change').to_dict('records')
+    # return temp_df.nsmallest(10,'% Change').to_dict('records')
 
 app.layout = make_layout
 # number=4
