@@ -16,8 +16,7 @@ import json #FOR JSON files
 import psycopg2 #For progres database
 # import sqlalchemy #For working with database
 from worker import createTickerDict, enterElement
-
-
+EST = pytz.timezone('America/New_York')
 
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
