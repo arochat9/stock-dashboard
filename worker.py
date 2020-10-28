@@ -196,5 +196,3 @@ def createTickerDict(filename):
     # # pickle.dump(today1, open('pickleFiles/datetime','wb') )
     # print("Completed final Pickle dumps")
     # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
-
-createTickerDict('compilation_testSize.csv')

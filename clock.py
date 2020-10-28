@@ -18,6 +18,8 @@ import psycopg2 #For progres database
 from worker import createTickerDict, enterElement
 EST = pytz.timezone('America/New_York')
 
+# createTickerDict('compilation_testSize.csv')
+
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
 # @scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=5, minute=18, timezone='UTC')
