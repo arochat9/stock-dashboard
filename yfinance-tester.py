@@ -12,8 +12,11 @@ import sqlalchemy
 import os
 from worker import getMostRecentPull, enterElement
 
+URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
+
+
 def createTables():
-    engine = sqlalchemy.create_engine("postgresql://postgres:Maroon6248@localhost/dashboard-database")
+    engine = sqlalchemy.create_engine(URL)
     con = engine.connect()
     # print(engine.table_names())
 
@@ -23,12 +26,16 @@ def createTables():
     for key in data.keys():
         df = pd.read_json(data[key])
         df = df.rename({'% Change': 'Percent Change'}, axis=1)  # new method
+        df = df.nsmallest(10,'Percent Change').append(df.nlargest(10,'Percent Change'))
+        print("key: "+str(key))
         table_name = key
         df.to_sql(table_name, con, if_exists='replace')
 
     print(engine.table_names())
     con.close()
-# createTables()
+    engine.dispose()
+createTables()
+print("**********")
 
 def getTopData():
     engine = sqlalchemy.create_engine("postgresql://postgres:Maroon6248@localhost/dashboard-database")
@@ -38,16 +45,32 @@ def getTopData():
     con.close()
     return dataFrame.nsmallest(10,'Percent Change')
 
-# number=4
-# timeTaken = timeit.timeit(getMostRecentPull, number=number)
-# print("AVG TIME TAKEN for new method")
-# print(timeTaken/number)
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date
-# DATABASE_URL = os.environ['postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv']
-URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
+def table2(value="Total Market", period="1 Day"):
+
+    engine = sqlalchemy.create_engine(URL)
+    con = engine.connect()
+    var = value+"-"+period
+    dataFrame = pd.read_sql("select * from \""+var+"\"", con);
+    con.close()
+    engine.dispose()
+    dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: float(x))
+    dataFrame = dataFrame.nsmallest(10,'Percent Change')
+    dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
+    return dataFrame.to_dict("records")
+    # print(dataFrame)
+
+# table2()
+number=4
+timeTaken = timeit.timeit(table2, number=number)
+print("AVG TIME TAKEN for method")
+print(timeTaken/number)
+
+# from sqlalchemy import create_engine
+# from sqlalchemy.ext.declarative import declarative_base
+# from sqlalchemy import Column, Integer, String, Date
+# # DATABASE_URL = os.environ['postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv']
+# URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
 
 # enterElement("testing",1)
 

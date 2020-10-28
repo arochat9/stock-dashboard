@@ -19,6 +19,7 @@ import pytz
 import json
 from worker import getMostRecentPull
 import sqlalchemy
+# import clock.py
 # from clock import startScheduler
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -276,6 +277,7 @@ def table1(value, period):
     var = value+"-"+period
     dataFrame = pd.read_sql("select * from \""+var+"\"", con);
     con.close()
+    engine.dispose()
     dataFrame = dataFrame.nsmallest(10,'Percent Change')
     dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
     return dataFrame.to_dict('records')
@@ -302,6 +304,7 @@ def table2(value, period):
     var = value+"-"+period
     dataFrame = pd.read_sql("select * from \""+var+"\"", con);
     con.close()
+    engine.dispose()
     dataFrame = dataFrame.nsmallest(10,'Percent Change')
     dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
     return dataFrame.to_dict('records')

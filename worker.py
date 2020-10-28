@@ -30,28 +30,84 @@ class dashInfo(Base):
 #     Base.metadata.drop_all(engine)
 #     Base.metadata.create_all(engine)
 
+def terminateConnections():
+    engine = sqlalchemy.create_engine(URL)
+    conn = engine.connect()
+    cur = conn.cursor()
+    cur.callproc('function_name', (value1,value2))
+    cur.execute("""
+    WITH inactive_connections AS (
+        SELECT
+            pid,
+            rank() over (partition by client_addr order by backend_start ASC) as rank
+        FROM
+            pg_stat_activity
+        WHERE
+            -- Exclude the thread owned connection (ie no auto-kill)
+            pid <> pg_backend_pid( )
+        AND
+            -- Exclude known applications connections
+            application_name !~ '(?:psql)|(?:pgAdmin.+)'
+        AND
+            -- Include connections to the same database the thread is connected to
+            datname = current_database()
+        AND
+            -- Include connections using the same thread username connection
+            usename = current_user
+        AND
+            -- Include inactive connections only
+            state in ('idle', 'idle in transaction', 'idle in transaction (aborted)', 'disabled')
+        AND
+            -- Include old connections (found with the state_change field)
+            current_timestamp - state_change > interval '5 minutes'
+    )
+    SELECT
+        pg_terminate_backend(pid)
+    FROM
+        inactive_connections
+    WHERE
+        rank > 1 -- Leave one connection for each application connected to the database
+    """)
+    cur.close()
+    conn.close()
+    engine.dispose()
+
 def enterElement(timeTemp,amountTemp):
     engine = sqlalchemy.create_engine(URL)
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    newEntry = dashInfo(
-        time=timeTemp,
-        amount=amountTemp
-    )
-    session.add(newEntry)
-    session.commit()
-    session.close()
-
-    print(getMostRecentPull())
+    try:
+        newEntry = dashInfo(
+            time=timeTemp,
+            amount=amountTemp
+        )
+        session.add(newEntry)
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        print("makes it into the finally *******")
+        session.close_all()
+        engine.dispose()
+    # print(getMostRecentPull())
 
 def getMostRecentPull():
     engine = sqlalchemy.create_engine(URL)
     Session = sessionmaker(bind=engine)
     session = Session()
-    lastElement = session.query(dashInfo).first()
-    session.close()
+
+    try:
+        lastElement = session.query(dashInfo).first()
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        sessions.close_all()
+        engine.dispose()
     return str(lastElement)
 
 #To supress print lines from yfinance
@@ -118,10 +174,12 @@ def getEverythingFromMarketMover(tickers_df,ticker_df_dict):
         for timeLength in timeLength_list:
             # marketMoverData_dict[(marketSize+"-"+timeLength)] = getMarketMoverData(marketSize,timeLength, tickers_df,ticker_df_dict).to_json()
             df = getMarketMoverData(marketSize,timeLength, tickers_df,ticker_df_dict).rename({'% Change': 'Percent Change'}, axis=1)
+            df = df.nlargest(10,'Percent Change').append(df.nsmallest(10,'Percent Change'))
             table_name = marketSize+"-"+timeLength
             df.to_sql(table_name, con, if_exists='replace')
 
     con.close()
+    engine.dispose()
     # with open('JSON Files/marketMoverData_dict.json', 'w') as fp:
     #     json.dump(new_marketMoverData_dict, fp)
     # print("Finished creating market mover data")
