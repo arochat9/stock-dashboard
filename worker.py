@@ -106,7 +106,7 @@ def getMostRecentPull():
         session.rollback()
         raise
     finally:
-        sessions.close_all()
+        session.close_all()
         engine.dispose()
     return str(lastElement)
 
