@@ -22,7 +22,7 @@ import sqlalchemy
 # import clock.py
 # from clock import startScheduler
 
-createTickerDict("compilation_testSize.csv")
+# createTickerDict("compilation_testSize.csv")
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
