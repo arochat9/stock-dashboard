@@ -34,7 +34,7 @@ def createTables():
     print(engine.table_names())
     con.close()
     engine.dispose()
-createTables()
+# createTables()
 print("**********")
 
 def getTopData():

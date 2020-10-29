@@ -163,7 +163,7 @@ def getMarketMoverData(category, timeLength, data1, data2):
     return pd.DataFrame(table_list, columns=['Symbol', '% Change', 'Price', 'Volume'])
 
 #Calls getMarketMoverData for all different possible parameters
-def getEverythingFromMarketMover(tickers_df,ticker_df_dict):
+def getEverythingFromMarketMover(tickers_df,ticker_df_dict, timeIndex, amount):
     print("Creating market mover data")
     # marketMoverData_dict = {}
 
@@ -175,22 +175,17 @@ def getEverythingFromMarketMover(tickers_df,ticker_df_dict):
             # marketMoverData_dict[(marketSize+"-"+timeLength)] = getMarketMoverData(marketSize,timeLength, tickers_df,ticker_df_dict).to_json()
             df = getMarketMoverData(marketSize,timeLength, tickers_df,ticker_df_dict).rename({'% Change': 'Percent Change'}, axis=1)
             df = df.nlargest(10,'Percent Change').append(df.nsmallest(10,'Percent Change'))
+
+            df['timeIndex'] = timeIndex
+            df['amount'] = amount
+
             table_name = marketSize+"-"+timeLength
             df.to_sql(table_name, con, if_exists='replace')
 
     con.close()
     engine.dispose()
-    # with open('JSON Files/marketMoverData_dict.json', 'w') as fp:
-    #     json.dump(new_marketMoverData_dict, fp)
-    # print("Finished creating market mover data")
-    # pickle.dump(marketMoverData_dict, open("pickleFiles/marketMoverData_dict.p", "wb" ), protocol=-1)
 
 def createTickerDict(filename):
-    # tickers_df = pickle.load( open("pickleFiles/tickers_df full.p", "rb") )
-    # ticker_df_dict = pickle.load( open("pickleFiles/ticker_df_dict full.p", "rb") )
-    # getEverythingFromMarketMover(tickers_df,ticker_df_dict)
-    # return
-
     print("Beginning yfinance data pull")
 
     tickers_df = pd.read_csv('Tickers/'+filename)
@@ -217,40 +212,15 @@ def createTickerDict(filename):
             temp_tickers_df = temp_tickers_df.append(df)
 
         if (count % 2) == 0:
-            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp)
+            today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp, today1, len(temp_tickers_df.index))
         count = count + 1
 
-
-        # with open('JSON Files/tickers_df.json', 'w') as fp:
-        #     json.dump(temp_tickers_df.to_json(), fp)
-
-        # pickle.dump(temp_tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-
-        today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-        enterElement(today1, len(temp_tickers_df.index))
-        # with open("JSON Files/datetime.txt", "w+") as f:
-        #     f.write(today1)
-
-        # pickle.dump(today1, open('pickleFiles/datetime','wb') )
-        # print("Completed JSON dumps")
-
+        # today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
+        # enterElement(today1, len(temp_tickers_df.index))
 
     print("Completed yfinance data pull")
 
     ticker_df_dict = ticker_df_dict_temp
-    getEverythingFromMarketMover(tickers_df,ticker_df_dict)
-
-
-
-    # with open('JSON Files/tickers_df.json', 'w') as fp:
-    #     json.dump(tickers_df.to_json(), fp)
-    # pickle.dump(tickers_df, open("pickleFiles/tickers_df.p", "wb" ), protocol=-1)
-
-
     today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-    enterElement(today1, len(tickers_df.index))
-    # with open("JSON Files/datetime.txt", "w+") as f:
-    #     f.write(today1)
-    # # pickle.dump(today1, open('pickleFiles/datetime','wb') )
-    # print("Completed final Pickle dumps")
-    # pickle.dump(ticker_df_dict, open("pickleFiles/ticker_df_dict.p", "wb" ), protocol=-1)
+    getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, len(tickers_df.index))

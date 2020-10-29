@@ -1,4 +1,4 @@
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import date
 import datetime
 import dash
@@ -10,17 +10,19 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import yfinance as yf
-import timeit
-from contextlib import contextmanager
-import sys, os
-from tqdm import tqdm
-import pickle
-import pytz
-import json
-from worker import getMostRecentPull
+# import timeit
+# from contextlib import contextmanager
+# import sys, os
+# from tqdm import tqdm
+# import pickle
+# import pytz
+# import json
+from worker import getMostRecentPull, createTickerDict
 import sqlalchemy
 # import clock.py
 # from clock import startScheduler
+
+createTickerDict("compilation_testSize.csv")
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -37,14 +39,9 @@ URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd
 def make_layout():
     # update = getMostRecentPull
     return html.Div(children=[
-    # dcc.Store(id='memory', data=pickle.load( open("pickleFiles/ticker_df_dict full.p", "rb"))  ),
-    # dcc.Store(id='memory', data=[pickle.load( open("pickleFiles/tickers_df full.p", "rb") ), pickle.load( open( "pickleFiles/ticker_df_dict full.p", "rb" ) )]  ),
-    # html.Div(id='initial_value', style={'display': 'none'}, children = [pickle.load( open("pickleFiles/tickers_df.p", "rb") ), pickle.load( open( "ticker_df_dict.p", "rb" ) )]   ),
-    # html.Div(id='intermediate-value2', style={'display': 'none'}, children = pickle.load( open( "pickleFiles/ticker_df_dict.p", "rb" ) )),
-
     html.Img(src=app.get_asset_url('my-logo.jpeg'), style={'width':'100px', 'position':'absolute','top':'50px','left':'5%', 'borderRadius':'20px'}),
 
-    html.H1(children='Stock Dashboard', style={'fontSize':'60px','marginTop':'50px','marginBottom':0,'marginLeft':'110px', 'color':'rgb(0,83,148)','fontWeight':'700'}),
+    html.H1(id='firstElement', children='Stock Dashboard', style={'fontSize':'60px','marginTop':'50px','marginBottom':0,'marginLeft':'110px', 'color':'rgb(0,83,148)','fontWeight':'700'}),
 
     html.Div(children='''
         Built with Dash: A web application framework for Python.
@@ -52,7 +49,7 @@ def make_layout():
     html.H3("Pricing Graph and Market Mover Table",  style={'marginTop':'30px','marginBottom':'0px', 'color':'rgb(103,144,153)'}),
 
     # html.H6("Currently have "+str(len(pickle.load( open("pickleFiles/tickers_df.p", "rb") ).index)) +" out of 9211 stocks loaded. Last pull: "+str(pickle.load(open('pickleFiles/datetime','rb')))+" EST", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
-    html.H6(id="introElement",children=getMostRecentPull(), style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
+    html.H6(id="introElement", style={'marginTop':'0px', 'marginBottom':'20px', 'color':'rgb(103,144,153)'}),
 
     html.Div([
         html.Div([
@@ -191,10 +188,21 @@ def make_layout():
     html.Div([], style={'padding':60,'clear':'both'})
 ], style={'marginLeft': '5%', 'marginRight': '5%'})
 
+@app.callback(
+    Output('introElement', 'children'),
+    [Input('firstElement', 'children')])
+def set_cities_options(value):
+    engine = sqlalchemy.create_engine(URL)
+    con = engine.connect()
+    var = "Total Market-1 Day"
+    dataFrame = pd.read_sql("select * from \""+var+"\"", con);
+    con.close()
+    engine.dispose()
+    return "Currently have {} out of 9211 stocks loaded. Last pull: {} EST".format(dataFrame['amount'][0], dataFrame['timeIndex'][0])
 
 @app.callback(
     Output('ticker-name', 'options'),
-    [Input('introElement', 'children')])
+    [Input('firstElement', 'children')])
 def set_cities_options(value):
     return [{'label': str(row['Symbol']) +" - "+str(row['Name']), 'value': row['Symbol']} for index, row in tickers_df.iterrows()]
 
@@ -278,18 +286,10 @@ def table1(value, period):
     dataFrame = pd.read_sql("select * from \""+var+"\"", con);
     con.close()
     engine.dispose()
+    dataFrame = dataFrame.drop(['timeIndex','amount'], axis=1)
     dataFrame = dataFrame.nsmallest(10,'Percent Change')
     dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
     return dataFrame.to_dict('records')
-    # with open('JSON Files/marketMoverData_dict.json') as json_file:
-        # data = json.load(json_file)
-
-    # temp_df = pd.read_json(data[value+"-"+period])
-
-    # marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
-    # temp_df = marketMoverData_dict[(value,period)]
-    # temp_df = getMarketMoverData(value,period, data[0],data[1])
-    # return temp_df.nlargest(10,'% Change').to_dict('records')
 
 #callback for market loser table
 @app.callback(
@@ -305,24 +305,12 @@ def table2(value, period):
     dataFrame = pd.read_sql("select * from \""+var+"\"", con);
     con.close()
     engine.dispose()
+    dataFrame = dataFrame.drop(['timeIndex','amount'], axis=1)
     dataFrame = dataFrame.nsmallest(10,'Percent Change')
     dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
     return dataFrame.to_dict('records')
-    # with open('JSON Files/marketMoverData_dict.json') as json_file:
-    #     data = json.load(json_file)
-
-    # temp_df = pd.read_json(data[value+"-"+period])
-
-    # marketMoverData_dict = pickle.load( open("pickleFiles/marketMoverData_dict.p", "rb") )
-    # temp_df = marketMoverData_dict[(value,period)]
-    # temp_df = getMarketMoverData(value,period, data[0],data[1])
-    # return temp_df.nsmallest(10,'% Change').to_dict('records')
 
 app.layout = make_layout
-# number=4
-# timeTaken = timeit.timeit(make_layout, number=number)
-# print("AVG TIME TAKEN")
-# print(timeTaken/number)
 
 if __name__ == '__main__':
     app.run_server(use_reloader=False, debug=True)

@@ -2,26 +2,21 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import date
 import datetime
-from contextlib import contextmanager
-import sys, os
-from tqdm import tqdm
-import pickle
 import pandas as pd
-import yfinance as yf
 import requests #FOR keeping the app awake
 import pytz
 # from data import settimeOfLastUpdate
 import json #FOR JSON files
 import psycopg2 #For progres database
 # import sqlalchemy #For working with database
-from worker import createTickerDict, enterElement, terminateConnections
+from worker import createTickerDict, enterElement
 EST = pytz.timezone('America/New_York')
 
 # createTickerDict('compilation_testSize.csv')
 print("started clock.py")
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
-@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=23, minute=1, timezone='UTC')
+@scheduler.scheduled_job('cron', day_of_week='mon-fri', hour=0, minute=15, timezone='UTC')
 def scheduled_job():
     print("**********")
     print("inside cron job")
@@ -46,7 +41,7 @@ scheduler.start()
 
 sched = BlockingScheduler()
 # scheduler = BlockingScheduler()
-@sched.scheduled_job('interval', minutes=1)
+@sched.scheduled_job('interval', minutes=2)
 def timed_job():
     # terminateConnections()
     print('This job is run every minute')
