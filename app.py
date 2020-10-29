@@ -1,4 +1,3 @@
-# from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import date
 import datetime
 import dash
@@ -10,17 +9,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import yfinance as yf
-# import timeit
-# from contextlib import contextmanager
-# import sys, os
-# from tqdm import tqdm
-# import pickle
-# import pytz
-# import json
 from worker import getMostRecentPull, createTickerDict
 import sqlalchemy
 # import clock.py
-# from clock import startScheduler
 
 # createTickerDict("compilation_testSize.csv")
 
@@ -32,7 +23,7 @@ app.title='Stock Dashboard'
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
 tickers_df = pd.read_csv('Tickers/compilation.csv')
-# URL = "postgresql://postgres:Maroon6248@localhost/dashboard-database"
+
 URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
 
 #app layout
@@ -287,7 +278,7 @@ def table1(value, period):
     con.close()
     engine.dispose()
     dataFrame = dataFrame.drop(['timeIndex','amount'], axis=1)
-    dataFrame = dataFrame.nsmallest(10,'Percent Change')
+    dataFrame = dataFrame.nlargest(10,'Percent Change')
     dataFrame['Percent Change'] = dataFrame['Percent Change'].apply(lambda x: round(x, 2))
     return dataFrame.to_dict('records')
 
@@ -313,6 +304,6 @@ def table2(value, period):
 app.layout = make_layout
 
 if __name__ == '__main__':
-    app.run_server(use_reloader=False, debug=True)
+    # app.run_server(use_reloader=False, debug=True)
     # app.run_server(debug=True)
-    # app.run_server(use_reloader=False)
+    app.run_server(use_reloader=False)

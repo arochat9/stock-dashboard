@@ -11,12 +11,9 @@ import yfinance as yf
 marketSize_list = ['Total Market', 'Only ETFs', 'Only Fortune 500']
 timeLength_list = ['1 Day', '1 Week', '1 Month', '1 Year']
 EST = pytz.timezone('America/New_York')
-# URL = "postgresql://postgres:Maroon6248@localhost/dashboard-database"
 URL = 'postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv'
-# DATABASE_URL = os.environ['postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv']
-# conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-#postgres://rrfjatgyxoplxp:85abb6064386584979cf0d6ddb56ed5e3154d743afd18dd42e4e6c46287f9f40@ec2-18-210-90-1.compute-1.amazonaws.com:5432/d9qtfjohvv68rv
 
+#Class for entering information into postgresql database using sqlalchemy
 Base = declarative_base()
 class dashInfo(Base):
     __tablename__ = 'dashInfo_table'
@@ -26,52 +23,7 @@ class dashInfo(Base):
     def __repr__(self):
         return "Currently have {} out of 9211 stocks loaded. Last pull: {} EST".format(self.amount, self.time)
 
-# def recreate_database():
-#     Base.metadata.drop_all(engine)
-#     Base.metadata.create_all(engine)
-
-def terminateConnections():
-    engine = sqlalchemy.create_engine(URL)
-    conn = engine.connect()
-    cur = conn.cursor()
-    cur.callproc('function_name', (value1,value2))
-    cur.execute("""
-    WITH inactive_connections AS (
-        SELECT
-            pid,
-            rank() over (partition by client_addr order by backend_start ASC) as rank
-        FROM
-            pg_stat_activity
-        WHERE
-            -- Exclude the thread owned connection (ie no auto-kill)
-            pid <> pg_backend_pid( )
-        AND
-            -- Exclude known applications connections
-            application_name !~ '(?:psql)|(?:pgAdmin.+)'
-        AND
-            -- Include connections to the same database the thread is connected to
-            datname = current_database()
-        AND
-            -- Include connections using the same thread username connection
-            usename = current_user
-        AND
-            -- Include inactive connections only
-            state in ('idle', 'idle in transaction', 'idle in transaction (aborted)', 'disabled')
-        AND
-            -- Include old connections (found with the state_change field)
-            current_timestamp - state_change > interval '5 minutes'
-    )
-    SELECT
-        pg_terminate_backend(pid)
-    FROM
-        inactive_connections
-    WHERE
-        rank > 1 -- Leave one connection for each application connected to the database
-    """)
-    cur.close()
-    conn.close()
-    engine.dispose()
-
+#Method to enter an element
 def enterElement(timeTemp,amountTemp):
     engine = sqlalchemy.create_engine(URL)
     Base.metadata.drop_all(engine)
@@ -94,6 +46,7 @@ def enterElement(timeTemp,amountTemp):
         engine.dispose()
     # print(getMostRecentPull())
 
+#Method to pull the element
 def getMostRecentPull():
     engine = sqlalchemy.create_engine(URL)
     Session = sessionmaker(bind=engine)
