@@ -4,7 +4,8 @@ import datetime
 import requests #FOR keeping the app awake
 import pytz
 from worker import createTickerDict, enterElement
-
+import time
+import sys
 EST = pytz.timezone('America/New_York')
 
 # createTickerDict('compilation_testSize.csv')
@@ -46,10 +47,9 @@ def timed_job():
             response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
             time.sleep(1)
             print(response)
-        except urllib.error.HTTPError as e:
-            print('Error code: ', e.code)
-        except urllib.error.URLError as e:
-            print('1Reason: ', e.reason)
+        except:
+            e = sys.exc_info()[0]
+            print(e)
         else:
             print('1good!')
 
