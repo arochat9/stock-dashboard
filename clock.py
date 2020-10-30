@@ -26,12 +26,12 @@ sched = BlockingScheduler()
 @sched.scheduled_job('interval', minutes=20)
 def timed_job():
     # terminateConnections()
-    print('This job is run every minute')
+    print('This job is run every 9 minutes')
     timeNow = datetime.datetime.now(EST)
     timeNow = timeNow.strftime("%H:%M")
     timeNow = datetime.datetime.strptime(timeNow, "%H:%M")
-    timeStart = '2:00PM'
-    timeEnd = '4:00PM'
+    timeStart = '2:00AM'
+    timeEnd = '10:00AM'
     timeEnd = datetime.datetime.strptime(timeEnd, "%I:%M%p")
     timeStart = datetime.datetime.strptime(timeStart, "%I:%M%p")
     print(timeNow)
@@ -40,7 +40,17 @@ def timed_job():
     if timeNow > timeStart and timeNow < timeEnd:
         print('In downtime window')
     else:
-        response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
-        print(response)
+
+        try:
+            time.sleep(1)
+            response = requests.get('https://my-stock-dashboard-app.herokuapp.com/')
+            time.sleep(1)
+            print(response)
+        except urllib.error.HTTPError as e:
+            print('Error code: ', e.code)
+        except urllib.error.URLError as e:
+            print('1Reason: ', e.reason)
+        else:
+            print('1good!')
 
 sched.start()
