@@ -155,7 +155,9 @@ def createTickerDict(filename):
                     data = yf.download(ticker, group_by="Ticker", period='1y')
                 ticker_df_dict_temp[ticker] = data
             except Exception as ex:
+                print('exception in yfinance pull')
                 print(ex)
+                print('done with exception')
                 continue
         print("Completed Section.")
         print("Finished "+str(500*count)+" Tickers so far")
