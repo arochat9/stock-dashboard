@@ -148,6 +148,9 @@ def createTickerDict(filename):
     ticker_df_dict_temp = {}
     count = 1
     temp_tickers_df = pd.DataFrame({'A' : []})
+
+    count = 0
+    failedTickers = []
     for df in list_of_dfs:
         for ticker in df['Symbol'].to_list():
             try:
@@ -157,8 +160,11 @@ def createTickerDict(filename):
             except Exception as ex:
                 print('exception in yfinance pull')
                 print(ex)
+                failedTickers.append(ticker)
                 print('done with exception')
                 continue
+            else:
+                count = count + 1
         print("Completed Section.")
         print("Finished "+str(500*count)+" Tickers so far")
         if (temp_tickers_df.empty):
@@ -168,14 +174,29 @@ def createTickerDict(filename):
 
         if (count % 2) == 0:
             today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp, today1, len(temp_tickers_df.index))
+            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp, today1, count)
         count = count + 1
 
-        # today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-        # enterElement(today1, len(temp_tickers_df.index))
+    print("Completed first pass of yfinance data pull")
+    print(str(count)+" stocks loaded.")
+    for ticker in failedTickers:
+        try:
+            with suppress_stdout():
+                data = yf.download(ticker, group_by="Ticker", period='1y')
+            ticker_df_dict_temp[ticker] = data
+        except Exception as ex:
+            print('exception in yfinance pull')
+            print(ex)
+            print('done with exception')
+            continue
+        else:
+            count = count + 1
 
     print("Completed yfinance data pull")
+    print(str(count)+" stocks loaded.")
 
     ticker_df_dict = ticker_df_dict_temp
     today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-    getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, len(tickers_df.index))
+    getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, count)
+
+createTickerDict('compilation_testSize.csv')
