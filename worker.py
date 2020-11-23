@@ -149,7 +149,7 @@ def createTickerDict(filename):
     count = 1
     temp_tickers_df = pd.DataFrame({'A' : []})
 
-    count = 0
+    tickerCount = 0
     failedTickers = []
     for df in list_of_dfs:
         for ticker in df['Symbol'].to_list():
@@ -164,7 +164,7 @@ def createTickerDict(filename):
                 print('done with exception')
                 continue
             else:
-                count = count + 1
+                tickerCount = tickerCount + 1
         print("Completed Section.")
         print("Finished "+str(500*count)+" Tickers so far")
         if (temp_tickers_df.empty):
@@ -174,11 +174,11 @@ def createTickerDict(filename):
 
         if (count % 2) == 0:
             today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp, today1, count)
+            getEverythingFromMarketMover(temp_tickers_df,ticker_df_dict_temp, today1, tickerCount)
         count = count + 1
 
     print("Completed first pass of yfinance data pull")
-    print(str(count)+" stocks loaded.")
+    print(str(tickerCount)+" stocks loaded.")
     for ticker in failedTickers:
         try:
             with suppress_stdout():
@@ -190,11 +190,11 @@ def createTickerDict(filename):
             print('done with exception')
             continue
         else:
-            count = count + 1
+            tickerCount = tickerCount + 1
 
     print("Completed yfinance data pull")
-    print(str(count)+" stocks loaded.")
+    print(str(tickerCount)+" stocks loaded.")
 
     ticker_df_dict = ticker_df_dict_temp
     today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
-    getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, count)
+    getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, tickerCount)
