@@ -198,5 +198,3 @@ def createTickerDict(filename):
     ticker_df_dict = ticker_df_dict_temp
     today1 = datetime.datetime.now(EST).strftime("%Y-%m-%d %I:%M %p")
     getEverythingFromMarketMover(tickers_df,ticker_df_dict, today1, count)
-
-createTickerDict('compilation_testSize.csv')
