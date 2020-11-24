@@ -11,8 +11,8 @@ EST = pytz.timezone('America/New_York')
 # createTickerDict('compilation_testSize.csv')
 print("started clock.py")
 
-print("running initial job")
-createTickerDict('compilation.csv')
+# print("running initial job")
+# createTickerDict('compilation.csv')
 
 # Here is the cron job so that the table can update once a day
 scheduler = BackgroundScheduler(daemon=True)
