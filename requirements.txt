@@ -5,7 +5,7 @@ dash_core_components==1.12.1
 dash_table==4.10.1
 pandas==0.25.1
 matplotlib==3.1.1
-yfinance==0.1.55
+yfinance==0.1.70
 plotly==4.11.0
 dash==1.16.3
 APScheduler==3.6.3
@@ -14,3 +14,4 @@ tqdm==4.31.1
 pytz==2019.2
 psycopg2==2.8.6
 gunicorn==19.9.0
+pandas-datareader==0.10.0
